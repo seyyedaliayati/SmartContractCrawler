@@ -14,7 +14,9 @@ def get_html(url):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
     }
     r = requests.get(url, headers=headers)
-    print(f"Status code: {r.status_code}")
+    if r.status_code != 200:
+        print(f"Status code: {r.status_code}")
+        print(f"Text: {r.text}")
     return r.text
 
 def is_valid_address(address):
