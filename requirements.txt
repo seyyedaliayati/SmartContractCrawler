@@ -1,0 +1,7 @@
+python-dotenv
+beautifulsoup4
+requests
+SQLAlchemy
+psycopg2-binary
+etherscan-python
+Flask

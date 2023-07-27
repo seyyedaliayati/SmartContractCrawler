@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Contract Data</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Smart Contract Data</h1>
+        <table class="table table-striped" id="smart-contract-table">
+            <thead>
+                <tr>
+                    <th>Smart Contract Address</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in data %}
+                <tr>
+                    <td>{{ entry.address }}</td>
+                    <td>{{ entry.name }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Initialize DataTable with search field for the 'name' column
+            $('#smart-contract-table').DataTable({
+                columnDefs: [
+                    {
+                        targets: [0, 1], // Index of the 'Name' column (0-based index)
+                        searchable: true
+                    }
+                ]
+            });
+        });
+    </script>
+</body>
+</html>
