@@ -81,13 +81,16 @@ def get_network_name_by_id(network_id):
 def process_block(web3, block_number):
     print(f"Processing block {block_number}")
     block = web3.eth.get_block(block_number)
-
+    wait_for_ankr()
+    print(f"Block {block_number} has {len(block.transactions)} transactions")
     for tx_hash in block.transactions:
         tx = web3.eth.get_transaction(tx_hash)
+        wait_for_ankr()
         if tx.to is None:
             receipt = web3.eth.get_transaction_receipt(tx_hash)
+            wait_for_ankr()
             contract_address = receipt.get('contractAddress', None)
-
+            wait_for_ankr()
             if contract_address:
                 data = {
                     "network_id": web3.eth.chain_id,
@@ -98,14 +101,18 @@ def process_block(web3, block_number):
                 }
                 add_to_redis(contract_address, data)
 
+def wait_for_ankr():
+    time.sleep(0.07)
+
 def fetch_addresses(web3: Web3):
     """
     redis: 
     block_number, block_hash, block_timestamp, tx_hash, address, is_processed
     """
     network_id = web3.eth.chain_id
+    wait_for_ankr()
     network_name = get_network_name_by_id(network_id)
-    blocks = (18589667, 18613607)
+    blocks = (18589667, web3.eth.block_number)
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         # Process blocks in parallel using threads
         futures = [executor.submit(process_block, web3, block_number) for block_number in range(*blocks)]
@@ -114,10 +121,18 @@ def fetch_addresses(web3: Web3):
         concurrent.futures.wait(futures)
 
 def main():
-    w3 = Web3(Web3.HTTPProvider('https://rpc.ankr.com/eth'))
-    w3.middleware_onion.inject(geth_poa_middleware, layer=0)
-    # run fetch_addresses in a thread
-    fetch_addresses(w3)
+    w3 = Web3(Web3.HTTPProvider('https://rpc.ankr.com/eth/1c5d82bce75bf240f7a831fb16428d7b4249a88ded1c3c7aaf8409ecc7632f93'))
+    try:
+        w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        # run fetch_addresses in a thread
+        fetch_addresses(w3)
+    except Exception as e:
+        if e.response.status_code == 429:
+            retry_after = e.response.headers.get("Retry-After", 0)
+            print(f"Rate limit exceeded. Retrying after {retry_after} seconds.")
+            time.sleep(int(retry_after))
+            main()
+        print(f"Error: {e}")
     exit(0)
     # Replace the starting block and ending block according to your requirements
     start_block = 0
