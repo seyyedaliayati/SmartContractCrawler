@@ -5,6 +5,6 @@ from api_crawl import crawl_and_save as crawl_and_save_api
 
 crawl_and_save_web()
 
-time.sleep(60)
+time.sleep(10)
 
 crawl_and_save_api()

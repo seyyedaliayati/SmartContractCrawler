@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, Column, String, Integer, Boolean, ForeignK
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
-load_dotenv()
+load_dotenv(override=True)
 
 # Create the SQLAlchemy engine
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -82,13 +82,32 @@ def store_details_in_db(contract_address, details):
 
 
 def get_web_data(limit=1000):
+    print(f"Engine: {DATABASE_URL}")
     Session = sessionmaker(bind=engine)
     session = Session()
 
     contracts = session.query(SmartContractDetail.contract_address, SmartContractDetail.details['ContractName']).join(SmartContractDetail.contract).filter(SmartContractAddress.has_detail == True).order_by(SmartContractDetail.id.desc()).limit(limit).all()
     session.close()
-    print(f"Found {len(contracts)} contracts like this: {contracts[0]}")
+    print(f"Found {len(contracts)} contracts.")
     return contracts
+
+def get_details_for_address(address):
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    contract = session.query(SmartContractDetail).filter(SmartContractDetail.contract_address == address).first()
+    session.close()
+    if contract is None:
+        return None
+    return contract.details
+
+def get_count_all():
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    count = session.query(SmartContractDetail).count()
+    session.close()
+    return count
 
 if __name__ == '__main__':
     get_web_data()

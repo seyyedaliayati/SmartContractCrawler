@@ -8,15 +8,24 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+    <!-- JSON Viewer CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.0/jsoneditor.min.css">
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container">
         <h1>Smart Contract Data</h1>
+        <p>
+            There are {{ data[0].all_count}} smart contracts in the database.
+            Below is a list of the last 10000 smart contracts.
+            Click on the "View Details" button to see more information about a smart contract.
+            If you need to get access to the full list of smart contracts, please contact me (https://x.com/seyyedaliayati).
+        </p>
         <table class="table table-striped" id="smart-contract-table">
             <thead>
                 <tr>
                     <th>Smart Contract Address</th>
                     <th>Name</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -24,10 +33,31 @@
                 <tr>
                     <td>{{ entry.address }}</td>
                     <td>{{ entry.name }}</td>
+                    <td><button class="btn btn-sm btn-secondary view-details" data-address="{{ entry.address }}">View Details</button></td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+
+    <!-- Modal for JSON Viewer -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsModalLabel">Smart Contract Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="json-viewer" style="max-height: 400px; overflow-y: auto;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- jQuery and Bootstrap JS -->
@@ -36,6 +66,8 @@
     <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+    <!-- JSON Viewer JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.0/jsoneditor.min.js"></script>
 
     <script>
         $(document).ready(function () {
@@ -48,6 +80,37 @@
                     }
                 ]
             });
+
+            $('.view-details').on('click', function () {
+                // Get the address from the button's data-address attribute
+                const address = $(this).data('address');
+
+                $('#json-viewer').html('<p>Loading...</p>');
+
+                // Fetch details from the API
+                $.ajax({
+                    url: `/api/address/${address}`,
+                    method: 'GET',
+                    success: function (response) {
+                        console.log(response);
+                        $('#json-viewer').html('');
+                        // Parse and render the JSON using JSONEditor
+                        const jsonViewer = new JSONEditor(document.getElementById('json-viewer'), {
+                            mode: 'view',
+                            mainMenuBar: false
+                        });
+                        jsonViewer.set(response['details']);
+                    },
+                    error: function (xhr) {
+                        $('#json-viewer').html('<p class="text-danger">Failed to load data. Please try again later.</p>');
+                    }
+                });
+
+                // Show the modal
+                $('#detailsModal').modal('show');
+            });
+
+            // end of document ready
         });
     </script>
 </body>
