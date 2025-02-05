@@ -70,18 +70,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.0/jsoneditor.min.js"></script>
 
     <script>
-        $(document).ready(function () {
-            // Initialize DataTable with search field for the 'name' column
-            $('#smart-contract-table').DataTable({
-                columnDefs: [
-                    {
-                        targets: [0, 1], // Index of the 'Name' column (0-based index)
-                        searchable: true
-                    }
-                ]
-            });
 
-            $('.view-details').on('click', function () {
+            function view_details(event) {
                 // Get the address from the button's data-address attribute
                 const address = $(this).data('address');
 
@@ -92,7 +82,6 @@
                     url: `/api/address/${address}`,
                     method: 'GET',
                     success: function (response) {
-                        console.log(response);
                         $('#json-viewer').html('');
                         // Parse and render the JSON using JSONEditor
                         const jsonViewer = new JSONEditor(document.getElementById('json-viewer'), {
@@ -108,7 +97,24 @@
 
                 // Show the modal
                 $('#detailsModal').modal('show');
+            };
+
+        $(document).ready(function () {
+            // Initialize DataTable with search field for the 'name' column
+            var table = $('#smart-contract-table').DataTable({
+                columnDefs: [
+                    {
+                        targets: [0, 1], // Index of the 'Name' column (0-based index)
+                        searchable: true
+                    }
+                ]
             });
+
+            table.on('draw.dt', function () {
+                $('.view-details').on('click', view_details);
+            });
+
+            $('.view-details').on('click', view_details);
 
             // end of document ready
         });
