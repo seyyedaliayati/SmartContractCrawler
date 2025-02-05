@@ -1,1 +1,1 @@
-0 * * * * /usr/local/bin/python3 /app/crawl.py >> /var/log/cron.log 2>&1
+*/5 * * * * /usr/local/bin/python3 /app/crawl.py >> /var/log/cron.log 2>&1
