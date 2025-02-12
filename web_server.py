@@ -26,7 +26,7 @@ def address_details(address):
 @app.route('/')
 def index():
     data = []
-    db_data = get_web_data(limit=10000)
+    db_data = get_web_data(limit=2000)
     all_count = get_count_all()
     
     for item in db_data:
@@ -35,7 +35,8 @@ def index():
             'address': item[0],
             'name': item[1],
             'details': details,
-            'all_count': all_count
+            'all_count': all_count,
+            'curr_count': len(db_data)
         })
     return render_template('index.html', data=data)
 
